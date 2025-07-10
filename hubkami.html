@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-KYB - Hubungi Kami</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="/assets/logo.jpg">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow: auto;
+            display: flex; /* Added for footer positioning */
+            flex-direction: column; /* Stack content vertically */
+        }
+
+        /* Background wrapper with 3D perspective */
+        .background-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            perspective: 1200px;
+            perspective-origin: center;
+            background: #1c2526; /* Fallback color */
+        }
+
+        /* Video background */
+        .background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        /* Vignette effect */
+        .background-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
+            z-index: 1;
+        }
+
+        /* Particle styles (distant stars) */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 2;
+            transform: translateZ(-600px);
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateZ(-600px) translateY(0) translateX(0);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateZ(-600px) translateY(-150vh) translateX(calc(var(--drift) * 8vw));
+                opacity: 0;
+            }
+        }
+
+        /* Node styles (network points) */
+        .node {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(78, 205, 196, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 3;
+            transform-style: preserve-3d;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.7), 0 0 5px rgba(78, 205, 196, 1);
+        }
+
+        /* Connection lines */
+        .node::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 1px;
+            background: linear-gradient(to right, rgba(168, 85, 247, 0.5), rgba(168, 85, 247, 0));
+            transform-origin: left;
+            transform: rotateY(45deg);
+            opacity: 0.5;
+            animation: pulseLine 2s ease-in-out infinite;
+        }
+
+        .node::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 1px;
+            background: linear-gradient(to right, rgba(168, 85, 247, 0.5), rgba(168, 85, 247, 0));
+            transform-origin: left;
+            transform: rotateY(-45deg);
+            opacity: 0.5;
+            animation: pulseLine 2s ease-in-out infinite reverse;
+        }
+
+        @keyframes pulseLine {
+            0% { opacity: 0.5; transform: rotateY(45deg) scaleX(1); }
+            50% { opacity: 0.8; transform: rotateY(45deg) scaleX(1.2); }
+            100% { opacity: 0.5; transform: rotateY(45deg) scaleX(1); }
+        }
+
+        @keyframes floatNode {
+            0% {
+                transform: translateZ(0) translateY(0) translateX(0) rotateX(0deg) rotateY(0deg) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateZ(150px) translateY(-50vh) translateX(calc(var(--drift) * 20vw)) rotateX(90deg) rotateY(90deg) scale(1.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translateZ(0) translateY(-100vh) translateX(calc(var(--drift) * 40vw)) rotateX(180deg) rotateY(180deg) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 80px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        header {
+            background-color: transparent;
+            padding: 1.5rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        nav {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #4ecdc4;
+        }
+
+        .btn-contact {
+            background: #fff;
+            color: #1a1a1a;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s ease, color 0.3s ease;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-contact:hover {
+            background: #4ecdc4;
+            color: #fff;
+        }
+
+        /* Hamburger menu */
+        .hamburger {
+            display: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: rgb(0, 110, 255);
+                padding: 1rem;
+                z-index: 999;
+            }
+
+            nav.active {
+                display: block;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            nav ul li a {
+                font-size: 1.2rem;
+            }
+
+            .btn-contact {
+                margin: 1rem auto;
+                display: block;
+                text-align: center;
+                width: fit-content;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 70vh; /* Reduced from 100vh to allow footer visibility */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: 80px; /* Account for fixed header */
+            flex: 1; /* Fill available space */
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero-content h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .btn-start {
+            background: #4ecdc4;
+            color: #fff;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background 0.3s ease;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-start:hover {
+            background: #53a19c;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            color: #000;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-form {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-form input {
+            padding: 12px 20px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(26, 26, 26, 0.2);
+        }
+
+        .modal-form button {
+            padding: 12px 30px;
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(26, 26, 26, 0.2);
+        }
+
+        .modal-form button:hover {
+            background: #4ecdc4;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #000;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        footer {
+            background: transparent;
+            color: #1a1a1a;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            text-align: left;
+            position: relative;
+            z-index: 10;
+            width: 100%; /* Ensure footer spans full width */
+        }
+
+        footer div {
+            flex: 1;
+            padding: 10px;
+        }
+
+        footer h3 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: #ffffff;
+        }
+
+        footer p, footer a {
+            font-size: 0.9rem;
+            color: #ffffff;
+            text-decoration: none;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        footer a:hover {
+            color: #4ecdc4;
+        }
+
+        @media (max-width: 768px) {
+            footer {
+                flex-direction: column; /* Stack columns on mobile */
+                text-align: center;
+            }
+        }
+
+        /* Attribution for Vecteezy */
+        .attribution {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background wrapper with video -->
+    <div class="background-wrapper">
+        <video class="background-video" autoplay loop muted playsinline poster="/assets/fallback-bg.jpg">
+            <source src="/assets/videoplayback.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- Attribution for Vecteezy -->
+    <div class="attribution">
+        <a href="https://www.vecteezy.com/free-videos/network-background" target="_blank" style="color: rgba(255, 255, 255, 0.7); text-decoration: underline;"></a>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>e-KYB</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="lp.html">Beranda</a></li>
+                    <li><a href="index.html">Fitur</a></li>
+                    <li><a href="hubkami.html">Kontak</a></li>
+                </ul>
+            </nav>
+            <a href="#" class="btn-contact" onclick="openModal()">Hubungi Kami</a>
+            <div class="hamburger" onclick="toggleNav()">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="contact" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Hubungi Kami untuk Demo</h2>
+                <p>Verifikasi yang Komprehensif dan Tepat merupakan salah satu kunci kesuksesan Kerjasama Bisnis</p>
+                <a href="#" class="btn-start" onclick="openModal()">Kirim Email</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <h2>Hubungi Kami untuk Demo</h2>
+            <p>Verifikasi yang Komprehensif dan Tepat merupakan salah satu kunci kesuksesan Kerjasama Bisnis</p>
+            <div class="modal-form">
+                <form action="https://formspree.io/f/xdkgjdql" method="POST">
+                    <input type="email" name="email" placeholder="Ketik alamat email Anda disini" required>
+                    <button type="submit">Kirim</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div>
+            <h3>Get the latest update</h3>
+            <p>Terhubung dengan kami</p>
+        </div>
+        <div>
+            <h3>e-KYB</h3>
+            <a href="#">Jelajahi</a>
+            <a href="#">Bantuan</a>
+        </div>
+        <div>
+            <h3>e-KYB</h3>
+            <a href="#">Mail</a>
+            <a href="#">Social Media</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript for modal, nodes, particles, and navbar -->
+    <script>
+        // Modal functionality
+        function openModal() {
+            document.getElementById('contactModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('contactModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('contactModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+
+
+
+        // Navbar toggle for mobile
+        function toggleNav() {
+            const nav = document.querySelector('nav');
+            nav.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
